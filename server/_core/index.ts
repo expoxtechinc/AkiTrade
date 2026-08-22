@@ -5,6 +5,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
+import { getAkiTradeControlPlaneLandingPage } from "./landing";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 
@@ -57,6 +58,10 @@ async function startServer() {
 
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+
+  app.get("/", (_req, res) => {
+    res.status(200).type("html").send(getAkiTradeControlPlaneLandingPage());
+  });
 
   app.get("/api/health", (_req, res) => {
     res.json({ ok: true, timestamp: Date.now() });

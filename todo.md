@@ -18,3 +18,4 @@
 - [x] Prepare a persistent worker architecture for 24/7 automation with health checks, kill switches, idempotency, alerting, and deployment documentation.
 - [x] Prepare Railway deployment configuration and environment-variable documentation without publishing or exposing credentials.
 - [x] Push the approved project revision to the selected AkiTrade GitHub repository.
+- [x] Fix the deployed control-plane root route so `/` returns a valid AkiTrade startup response instead of `Cannot GET /`.
