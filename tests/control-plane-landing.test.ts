@@ -8,6 +8,7 @@ describe("AkiTrade control-plane landing page", () => {
 
     expect(page).toContain("Exness Auto Trader is online.");
     expect(page).toContain("/api/health");
-    expect(page).toContain("live order dispatch is disabled");
+    expect(page).toContain("/api/status");
+    expect(page).toContain("MT5 BRIDGE CONNECTION");
   });
 });

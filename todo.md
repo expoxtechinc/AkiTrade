@@ -19,3 +19,7 @@
 - [x] Prepare Railway deployment configuration and environment-variable documentation without publishing or exposing credentials.
 - [x] Push the approved project revision to the selected AkiTrade GitHub repository.
 - [x] Fix the deployed control-plane root route so `/` returns a valid AkiTrade startup response instead of `Cannot GET /`.
+- [x] Add a simple root web dashboard that displays MT5 bridge connection status and control-plane system health.
+- [x] Securely configure the supplied Expo access token as a server-only deployment credential.
+- [x] Prepare Vercel-compatible deployment artifacts and document the separate backend/Expo constraints.
+- [ ] Synchronize the approved dashboard and deployment-preparation revision to the selected AkiTrade GitHub repository.

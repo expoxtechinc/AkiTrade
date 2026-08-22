@@ -8,6 +8,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { getAkiTradeControlPlaneLandingPage } from "./landing";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
+import { mt5Bridge } from "../trading/mt5-bridge";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -28,9 +29,8 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-async function startServer() {
+export function createAkiTradeApp() {
   const app = express();
-  const server = createServer(app);
 
   // Enable CORS for all routes - reflect the request origin to support credentials
   app.use((req, res, next) => {
@@ -67,6 +67,19 @@ async function startServer() {
     res.json({ ok: true, timestamp: Date.now() });
   });
 
+  app.get("/api/status", async (_req, res) => {
+    const mt5 = await mt5Bridge.getHealth();
+    res.json({
+      status: "healthy",
+      serverTime: new Date().toISOString(),
+      uptimeSeconds: Math.floor(process.uptime()),
+      mt5: {
+        ...mt5,
+        lastHeartbeatAt: mt5.lastHeartbeatAt?.toISOString() ?? null,
+      },
+    });
+  });
+
   app.use(
     "/api/trpc",
     createExpressMiddleware({
@@ -74,6 +87,13 @@ async function startServer() {
       createContext,
     }),
   );
+
+  return app;
+}
+
+async function startServer() {
+  const app = createAkiTradeApp();
+  const server = createServer(app);
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);
@@ -87,4 +107,6 @@ async function startServer() {
   });
 }
 
-startServer().catch(console.error);
+if (process.env.VERCEL !== "1") {
+  startServer().catch(console.error);
+}
