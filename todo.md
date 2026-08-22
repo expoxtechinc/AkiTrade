@@ -62,3 +62,4 @@
 - [ ] Verify the Vercel production dashboard, legal pages, health endpoint, and status endpoint after deployment.
 - [x] Remove the static-output conflict that serves the server bundle at `/` and restores Vercel serverless route handling.
 - [ ] Revalidate and redeploy the corrected Vercel configuration, then recheck every production route.
+- [ ] Disable Vercel’s custom static build mode so the `api/` serverless functions are deployed without an output-directory requirement.

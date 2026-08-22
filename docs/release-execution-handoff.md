@@ -19,7 +19,7 @@ After the signed artifact is generated, upload the `.aab` to Play Console’s In
 
 ## Vercel Web Control Plane
 
-The previous Vercel production build expected a `public` directory. The current release uses Vercel serverless functions from `api/` and deliberately leaves the static Output Directory unset: `dist` contains server build artifacts and must not be served directly. The committed `vercel.json` defines only the root and legal-page rewrites plus function limits.
+The previous Vercel production build expected a `public` directory. The current release uses Vercel's documented root `server.ts` Express entrypoint and deliberately leaves the static Output Directory unset: `dist` contains server build artifacts and must not be served directly. The committed `vercel.json` defines only the root Express function limit.
 
 Once the approved checkpoint is on GitHub `main`, use [docs/vercel-deployment.md](./vercel-deployment.md) to configure the existing Vercel project and select **Redeploy** for the latest `main` commit. Confirm Vercel uses the repository’s `vercel.json`, then verify:
 

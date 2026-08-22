@@ -2,18 +2,18 @@
 
 ## What Vercel Hosts
 
-The repository now exposes the AkiTrade control plane as Vercel-compatible serverless Express functions. The root route serves the public system dashboard and `/api/status` reports a non-sensitive MT5 bridge summary. The browser dashboard is intentionally limited to control-plane and bridge readiness; it never returns credentials, account balances, open positions, or trade decisions.
+The repository now exposes the AkiTrade control plane through the root `server.ts` Vercel-compatible Express entrypoint. The root route serves the public system dashboard and `/api/status` reports a non-sensitive MT5 bridge summary. The browser dashboard is intentionally limited to control-plane and bridge readiness; it never returns credentials, account balances, open positions, or trade decisions.
 
 | Route | Vercel behavior | Purpose |
 | --- | --- | --- |
-| `/` | Rewritten to the serverless Express root entry | AkiTrade system and MT5 bridge health dashboard |
-| `/privacy` | Rewritten to the serverless Express root entry | Public Privacy Policy for product and Google OAuth configuration |
-| `/terms` | Rewritten to the serverless Express root entry | Public Terms of Service for product and Google OAuth configuration |
-| `/api/health` | Catch-all Express API function | Liveness probe |
-| `/api/status` | Catch-all Express API function | Public, non-sensitive system and MT5 bridge status |
-| `/api/trpc/*` | Catch-all Express API function | Authenticated mobile application API |
+| `/` | Root Express entrypoint | AkiTrade system and MT5 bridge health dashboard |
+| `/privacy` | Root Express entrypoint | Public Privacy Policy for product and Google OAuth configuration |
+| `/terms` | Root Express entrypoint | Public Terms of Service for product and Google OAuth configuration |
+| `/api/health` | Root Express entrypoint | Liveness probe |
+| `/api/status` | Root Express entrypoint | Public, non-sensitive system and MT5 bridge status |
+| `/api/trpc/*` | Root Express entrypoint | Authenticated mobile application API |
 
-Vercel supports exporting an Express application as the default export of a serverless function. [1] The deployment uses that model through `api/index.ts` and `api/[...path].ts`; the root rewrite is defined in `vercel.json`. [2]
+Vercel supports exporting an Express application as the default export of a serverless function. [1] The deployment uses that model through the documented root `server.ts` entrypoint, which exports AkiTrade's shared Express application. [2]
 
 ## Constraints
 
@@ -24,7 +24,7 @@ The Expo credential is stored only as `EXPO_TOKEN` in the secure project environ
 ## One-Time Deployment Setup
 
 1. Open the [existing AkiTrade Vercel project](https://vercel.com/expoxtechincs-projects/akitrade) and confirm it is linked to `expoxtechinc/AkiTrade` with `main` as the production branch.
-2. In **Settings → General**, keep the project root at the repository root and use Node.js **22.x**.
+2. In **Settings → General**, keep the project root at the repository root, use Node.js **22.x**, and select the **Express** framework preset.
 3. In **Settings → Build and Deployment**, use `pnpm install --frozen-lockfile` as the install command and `pnpm build` as the build command. Leave **Output Directory** unset/auto-detected. This project uses Vercel Functions from `api/`; `dist` contains build artifacts for the server and must not be published as a static site.
 4. In **Settings → Environment Variables**, configure server-only values for protected application workflows. Never copy `EXPO_TOKEN`, `VERCEL_TOKEN`, broker secrets, or any secret into browser-prefixed variables.
 
@@ -49,7 +49,7 @@ The Android binary is not hosted by Vercel. After the API domain has been verifi
 1. Open **Deployments** in the existing Vercel AkiTrade project.
 2. Locate the newest deployment sourced from the GitHub `main` branch. Confirm that the commit includes the Privacy Policy, Terms of Service, `vercel.json` route changes, and this runbook.
 3. Open the deployment menu and select **Redeploy**. Keep every live broker-dispatch feature disabled; deployment must preserve the paper-first boundary.
-4. Wait for the build result. If `/` shows bundled server source or any public route returns `FUNCTION_INVOCATION_FAILED`, remove any project-level static Output Directory override and confirm the committed `vercel.json` has no `outputDirectory` value. Vercel must invoke `api/index.ts` and `api/[...path].ts`, not serve the build artifacts in `dist` directly.
+4. Wait for the build result. If `/` shows bundled server source or any public route returns `FUNCTION_INVOCATION_FAILED`, remove any project-level static Output Directory override and confirm the committed `vercel.json` has no `outputDirectory` value. Vercel must invoke the root `server.ts` Express entrypoint, not serve the build artifacts in `dist` directly.
 5. When the deployment is marked **Ready**, open the production domain and run the acceptance checks below. If any critical check fails, use Vercel’s rollback action to return to the previous successful deployment.
 
 ## Production Acceptance Checks
