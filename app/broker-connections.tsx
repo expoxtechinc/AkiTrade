@@ -8,10 +8,16 @@ import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 
 const providers = [
-  { id: "ctrader", label: "cTrader", detail: "Broker-approved app authorization" },
-  { id: "oanda", label: "OANDA", detail: "Server-side revocable token vault" },
+  { id: "exness_mt5", label: "Exness MT5", detail: "Desktop MT5 bridge; no password in app" },
+  { id: "exness_mt4", label: "Exness MT4", detail: "Desktop MT4 EA bridge; no password in app" },
   { id: "mt5_bridge", label: "MT5 bridge", detail: "User-controlled terminal bridge" },
   { id: "mt4_bridge", label: "MT4 bridge", detail: "User-controlled EA bridge" },
+  { id: "ctrader", label: "cTrader", detail: "Broker-approved Open API authorization" },
+  { id: "interactive_brokers", label: "Interactive Brokers", detail: "TWS or Gateway connection reference" },
+  { id: "alpaca", label: "Alpaca", detail: "Official API vault, paper account first" },
+  { id: "binance", label: "Binance", detail: "Restricted official API vault" },
+  { id: "oanda", label: "OANDA", detail: "Server-side revocable token vault" },
+  { id: "generic_official_api", label: "Other official API", detail: "Modular future-provider adapter" },
 ] as const;
 
 export default function BrokerConnectionsScreen() {
@@ -43,6 +49,13 @@ function BrokerConnectionsContent() {
     },
     onError: (error) => setNotice(error.message),
   });
+  const disconnect = trpc.trading.disconnectBrokerConnection.useMutation({
+    onSuccess: () => {
+      setNotice("Connection revoked. AkiTrade removed the server-side authorization reference and did not retain any broker credential.");
+      utils.trading.brokerConnections.invalidate();
+    },
+    onError: (error) => setNotice(error.message),
+  });
 
   if (connections.isLoading) return <LoadingState label="Loading secure connection controls…" />;
   const canSubmit = accountReference.trim().length >= 3 && displayName.trim().length >= 3 && !requestConnection.isPending;
@@ -68,7 +81,7 @@ function BrokerConnectionsContent() {
       {notice ? <Card style={styles.notice}><Text style={[styles.noticeText, { color: colors.foreground }]}>{notice}</Text></Card> : null}
 
       <Text style={[styles.section, { color: colors.foreground }]}>Your connections</Text>
-      {(connections.data ?? []).length === 0 ? <Card><Text style={[styles.detail, { color: colors.muted }]}>No broker connection has been prepared. Paper trading remains available independently.</Text></Card> : (connections.data ?? []).map((connection) => <Card key={connection.id} style={styles.connection}><View style={styles.row}><View style={{ flex: 1 }}><Text style={[styles.cardTitle, { color: colors.foreground }]}>{connection.displayName}</Text><Text style={[styles.detail, { color: colors.muted }]}>{connection.provider.replaceAll("_", " ").toUpperCase()} · {connection.environment.toUpperCase()} · {connection.connectionMode.replaceAll("_", " ")}</Text></View><StatusPill label={connection.status.replaceAll("_", " ").toUpperCase()} tone={connection.status === "ready" ? "success" : "warning"} /></View>{connection.environment === "live" && connection.consent?.status !== "acknowledged" ? <Pressable onPress={() => acknowledge.mutate({ brokerConnectionId: connection.id, confirmed: true })} style={({ pressed }) => [styles.consent, { borderColor: colors.warning, opacity: pressed ? 0.72 : 1 }]}><Text style={[styles.consentLabel, { color: colors.warning }]}>Acknowledge live-mode limits</Text></Pressable> : null}{connection.consent?.status === "acknowledged" ? <Text style={[styles.helper, { color: colors.warning }]}>Limits acknowledged. Live execution remains locked in this release.</Text> : null}</Card>)}
+      {(connections.data ?? []).length === 0 ? <Card><Text style={[styles.detail, { color: colors.muted }]}>No broker connection has been prepared. Paper trading remains available independently.</Text></Card> : (connections.data ?? []).map((connection) => <Card key={connection.id} style={styles.connection}><View style={styles.row}><View style={{ flex: 1 }}><Text style={[styles.cardTitle, { color: colors.foreground }]}>{connection.displayName}</Text><Text style={[styles.detail, { color: colors.muted }]}>{connection.provider.replaceAll("_", " ").toUpperCase()} · {connection.environment.toUpperCase()} · {connection.connectionMode.replaceAll("_", " ")}</Text></View><StatusPill label={connection.status.replaceAll("_", " ").toUpperCase()} tone={connection.status === "ready" ? "success" : "warning"} /></View>{connection.environment === "live" && connection.consent?.status !== "acknowledged" ? <Pressable onPress={() => acknowledge.mutate({ brokerConnectionId: connection.id, confirmed: true })} style={({ pressed }) => [styles.consent, { borderColor: colors.warning, opacity: pressed ? 0.72 : 1 }]}><Text style={[styles.consentLabel, { color: colors.warning }]}>Acknowledge live-mode limits</Text></Pressable> : null}{connection.consent?.status === "acknowledged" ? <Text style={[styles.helper, { color: colors.warning }]}>Limits acknowledged. Live execution remains locked in this release.</Text> : null}{connection.status !== "revoked" ? <Pressable onPress={() => disconnect.mutate({ brokerConnectionId: connection.id })} style={({ pressed }) => [styles.disconnect, { borderColor: colors.error, opacity: pressed ? 0.72 : 1 }]}><Text style={[styles.consentLabel, { color: colors.error }]}>{disconnect.isPending ? "Disconnecting…" : "Disconnect account"}</Text></Pressable> : null}</Card>)}
     </ScrollView>
   );
 }
@@ -98,5 +111,6 @@ const styles = StyleSheet.create({
   noticeText: { fontSize: 12, lineHeight: 19, fontWeight: "700" },
   connection: { gap: 10 },
   consent: { minHeight: 42, borderWidth: 1, borderRadius: 12, justifyContent: "center", alignItems: "center" },
+  disconnect: { minHeight: 42, borderWidth: 1, borderRadius: 12, justifyContent: "center", alignItems: "center" },
   consentLabel: { fontSize: 12, fontWeight: "900" },
 });

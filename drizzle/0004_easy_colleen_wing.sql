@@ -1,0 +1,1 @@
+ALTER TABLE `brokerConnections` MODIFY COLUMN `provider` enum('ctrader','oanda','mt4_bridge','mt5_bridge','exness_mt4','exness_mt5','interactive_brokers','alpaca','binance','generic_official_api') NOT NULL;

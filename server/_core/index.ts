@@ -9,6 +9,7 @@ import { getAkiTradeControlPlaneLandingPage } from "./landing";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { mt5Bridge } from "../trading/mt5-bridge";
+import { brokerAdapterRegistry } from "../trading/broker-contract";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -77,6 +78,12 @@ export function createAkiTradeApp() {
         ...mt5,
         lastHeartbeatAt: mt5.lastHeartbeatAt?.toISOString() ?? null,
       },
+      adapters: Object.values(brokerAdapterRegistry).map((adapter) => ({
+        provider: adapter.provider,
+        connectionMode: adapter.connectionMode,
+        demoCapable: adapter.capabilities.demo,
+        liveDispatchEnabled: false,
+      })),
     });
   });
 

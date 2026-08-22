@@ -224,7 +224,7 @@ export const brokerConnections = mysqlTable(
   {
     id: int("id").autoincrement().primaryKey(),
     userId: int("userId").notNull(),
-    provider: mysqlEnum("provider", ["ctrader", "oanda", "mt4_bridge", "mt5_bridge"]).notNull(),
+    provider: mysqlEnum("provider", ["ctrader", "oanda", "mt4_bridge", "mt5_bridge", "exness_mt4", "exness_mt5", "interactive_brokers", "alpaca", "binance", "generic_official_api"]).notNull(),
     connectionMode: mysqlEnum("connectionMode", ["oauth", "server_token", "terminal_bridge"]).notNull(),
     environment: mysqlEnum("environment", ["demo", "live"]).default("demo").notNull(),
     status: mysqlEnum("status", ["pending", "read_only", "ready", "revoked", "error"]).default("pending").notNull(),

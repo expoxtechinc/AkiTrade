@@ -23,3 +23,9 @@
 - [x] Securely configure the supplied Expo access token as a server-only deployment credential.
 - [x] Prepare Vercel-compatible deployment artifacts and document the separate backend/Expo constraints.
 - [ ] Synchronize the approved dashboard and deployment-preparation revision to the selected AkiTrade GitHub repository.
+- [x] Document official integration boundaries and capability levels for MT4/MT5, Exness, cTrader, Interactive Brokers, Alpaca, Binance, and future providers.
+- [x] Generalize shared trading models into a unified broker-agnostic account, market-data, position, order, order-status, trade-history, and adapter contract.
+- [x] Implement modular secure connect/disconnect, adapter registry, normalized execution intents, detailed audit logs, and universal risk enforcement without mobile password storage.
+- [x] Add a bounded AI analysis layer that produces structured recommendations only and always routes through the risk engine; it must never obtain unrestricted execution authority.
+- [x] Extend the existing mobile broker-connection experience and root dashboard to surface multi-platform capabilities and connection health.
+- [ ] Create a fresh, uniquely named Vercel project after GitHub synchronization and verify its preview deployment without duplicating the unresolved project.

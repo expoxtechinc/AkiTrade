@@ -10,5 +10,6 @@ describe("AkiTrade control-plane landing page", () => {
     expect(page).toContain("/api/health");
     expect(page).toContain("/api/status");
     expect(page).toContain("MT5 BRIDGE CONNECTION");
+    expect(page).toContain("UNIFIED ADAPTERS");
   });
 });

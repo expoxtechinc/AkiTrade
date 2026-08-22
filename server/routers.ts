@@ -11,6 +11,8 @@ import { mt5Bridge } from "./trading/mt5-bridge";
 import { runPaperDecisionCycle } from "./trading/paper-service";
 import { runPaperBacktest } from "./trading/engine";
 import { BROKER_PROVIDERS } from "./trading/broker-contract";
+import { analyzeMarketWithAi } from "./trading/ai-analysis";
+import { riskGateAiRecommendation } from "./trading/universal-risk";
 
 const riskControlsInput = z.object({
   maxRiskPerTradePercent: z.number().finite().min(0.01).max(10),
@@ -136,6 +138,9 @@ export const appRouter = router({
         displayName: z.string().trim().min(3).max(128),
       }))
       .mutation(({ ctx, input }) => db.requestBrokerConnection(ctx.user.id, input)),
+    disconnectBrokerConnection: protectedProcedure
+      .input(z.object({ brokerConnectionId: z.number().int().positive() }))
+      .mutation(({ ctx, input }) => db.disconnectBrokerConnection(ctx.user.id, input.brokerConnectionId)),
     acknowledgeLiveTradingConsent: protectedProcedure
       .input(z.object({ brokerConnectionId: z.number().int().positive(), confirmed: z.literal(true) }))
       .mutation(({ ctx, input }) => db.acknowledgeLiveTradingConsent(ctx.user.id, input.brokerConnectionId)),
@@ -150,6 +155,21 @@ export const appRouter = router({
         takeProfit: z.number().finite().positive(),
       }))
       .mutation(({ ctx, input }) => db.createExecutionIntent(ctx.user.id, input)),
+    analyzeMarket: protectedProcedure
+      .input(z.object({ provider: z.enum(BROKER_PROVIDERS), symbol: z.enum(SUPPORTED_INSTRUMENTS) }))
+      .mutation(async ({ ctx, input }) => {
+        const candles = buildDemoPaperCandles(input.symbol, 64);
+        const latest = candles.at(-1);
+        if (!latest) throw new Error("Market data is unavailable for analysis");
+        const recommendation = await analyzeMarketWithAi({
+          platform: input.provider,
+          symbol: input.symbol,
+          quote: { platform: input.provider, symbol: input.symbol, bid: latest.close, ask: latest.close, last: latest.close, timestamp: latest.timestamp },
+          recentCandles: candles,
+        });
+        const risk = await db.getUniversalRiskContext(ctx.user.id);
+        return riskGateAiRecommendation(recommendation, risk);
+      }),
   }),
 });
 

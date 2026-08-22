@@ -35,6 +35,7 @@ import { calculatePaperPnl } from "./trading/engine";
 import { createEmergencyCloseOutcomes } from "./trading/emergency";
 import {
   assessFutureExecution,
+  getBrokerAdapter,
   getBrokerAuthorizationInstruction,
   type BrokerEnvironment,
   type BrokerProvider,
@@ -226,6 +227,30 @@ export async function requestBrokerConnection(
   return { connection, authorization };
 }
 
+/** Revokes the local connection reference and any consent; no raw broker credential is persisted. */
+export async function disconnectBrokerConnection(userId: number, brokerConnectionId: number) {
+  const db = await requireDb();
+  const [connection] = await db.select().from(brokerConnections).where(and(
+    eq(brokerConnections.id, brokerConnectionId),
+    eq(brokerConnections.userId, userId),
+  )).limit(1);
+  if (!connection) throw new Error("Broker connection was not found");
+
+  await getBrokerAdapter(connection.provider).disconnect(connection.accountReference);
+  await db.update(brokerConnections).set({
+    status: "revoked",
+    authorizationRef: null,
+    lastHeartbeatAt: null,
+  }).where(eq(brokerConnections.id, connection.id));
+  await db.update(liveTradingConsents).set({ status: "revoked", revokedAt: new Date() })
+    .where(eq(liveTradingConsents.brokerConnectionId, connection.id));
+  await recordAuditEvent(userId, "broker_connection_disconnected", "broker_connection", String(connection.id), {
+    provider: connection.provider,
+    credentialsPersisted: false,
+  });
+  return { disconnected: true as const, brokerConnectionId: connection.id };
+}
+
 export async function acknowledgeLiveTradingConsent(userId: number, brokerConnectionId: number) {
   const db = await requireDb();
   const [connection] = await db.select().from(brokerConnections).where(and(
@@ -356,6 +381,33 @@ export async function getPaperDashboard(userId: number) {
       unrealizedPnl: Number(unrealizedPnl.toFixed(2)),
       realizedPnl: Number(realizedPnl.toFixed(2)),
     },
+  };
+}
+
+/** Supplies a normalized paper-first risk context used for all adapters and AI recommendation reviews. */
+export async function getUniversalRiskContext(userId: number) {
+  const db = await requireDb();
+  const dashboard = await getPaperDashboard(userId);
+  const allPositions = await db.select().from(paperPositions).where(eq(paperPositions.userId, userId));
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  return {
+    controls: {
+      maxRiskPerTradePercent: Number(dashboard.risk.maxRiskPerTradePercent),
+      maxDailyLoss: Number(dashboard.risk.maxDailyLoss),
+      maxTradesPerDay: dashboard.risk.maxTradesPerDay,
+      maxOpenPositions: dashboard.risk.maxOpenPositions,
+      requireStopLoss: dashboard.risk.requireStopLoss,
+      requireTakeProfit: dashboard.risk.requireTakeProfit,
+    },
+    accountEquity: dashboard.accountSummary.equity,
+    proposedRiskAmount: dashboard.accountSummary.equity * (Number(dashboard.risk.maxRiskPerTradePercent) / 100),
+    dailyRealizedPnl: dashboard.accountSummary.realizedPnl,
+    tradesOpenedToday: allPositions.filter((position) => position.openedAt >= todayStart).length,
+    openPositions: dashboard.positions.length,
+    hasStopLoss: true,
+    hasTakeProfit: true,
+    emergencyStopActive: false,
   };
 }
 
