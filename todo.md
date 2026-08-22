@@ -55,4 +55,4 @@
 - [ ] Push this legal-pages release to GitHub and redeploy the Vercel production service after explicit confirmation.
 - [x] Push the approved legal-pages release to the selected expoxtechinc/AkiTrade GitHub main branch.
 - [x] Verify the pushed GitHub main revision and deliver the step-by-step Vercel deployment procedure without triggering production deployment.
-- [ ] Push the final Vercel deployment runbook update to the selected GitHub main branch.
+- [x] Push the final Vercel deployment runbook update to the selected GitHub main branch.
