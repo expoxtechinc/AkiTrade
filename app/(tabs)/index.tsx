@@ -1,10 +1,12 @@
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AkiTradeAuthGate } from "@/components/akitrade-auth-gate";
 import { Card, EmptyState, formatMoney, Metric, PrimaryButton, SectionTitle, StatusPill } from "@/components/akitrade-ui";
 import { DashboardLoadingState } from "@/components/dashboard-loading-state";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
+import { getDashboardRefreshCopy } from "@/lib/dashboard-loading";
 import { haptic } from "@/lib/haptics";
 import { showPaperAlert } from "@/lib/paper-notifications";
 import { trpc } from "@/lib/trpc";
@@ -27,6 +29,23 @@ function OverviewContent() {
   const runCycle = trpc.trading.runDemoPaperCycle.useMutation({ onSuccess: () => overview.refetch() });
   const closeAll = trpc.trading.closeAllPaperPositions.useMutation({ onSuccess: () => overview.refetch() });
   const data = overview.data;
+  const [refreshFailed, setRefreshFailed] = useState(false);
+  const isRefreshing = overview.isRefetching || bridgeStatus.isRefetching;
+  const refreshCopy = getDashboardRefreshCopy(isRefreshing ? "refreshing" : refreshFailed ? "error" : "idle");
+
+  const refreshDashboard = async () => {
+    if (isRefreshing) return;
+    haptic.light();
+    setRefreshFailed(false);
+    const results = await Promise.all([overview.refetch(), bridgeStatus.refetch()]);
+    const didFail = results.some((result) => Boolean(result.error));
+    setRefreshFailed(didFail);
+    if (didFail) {
+      haptic.error();
+      return;
+    }
+    haptic.success();
+  };
 
   const toggleAutomation = async () => {
     if (!data) return;
@@ -72,10 +91,28 @@ function OverviewContent() {
           <Text style={[styles.eyebrow, { color: colors.muted }]}>AKITRADE CONTROL</Text>
           <Text style={[styles.title, { color: colors.foreground }]}>Paper trading</Text>
         </View>
-        <StatusPill label="DEMO / PAPER" tone="success" />
+        <View style={styles.headerActions}>
+          <StatusPill label="DEMO / PAPER" tone="success" />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Refresh paper trading data and API status"
+            accessibilityHint="Fetches the latest paper workspace snapshot without placing any order"
+            accessibilityState={{ disabled: isRefreshing, busy: isRefreshing }}
+            disabled={isRefreshing}
+            onPress={refreshDashboard}
+            style={({ pressed }) => [
+              styles.refreshButton,
+              { backgroundColor: `${colors.primary}12`, borderColor: `${colors.primary}35` },
+              pressed && !isRefreshing && styles.refreshButtonPressed,
+              isRefreshing && styles.refreshButtonDisabled,
+            ]}
+          >
+            <Text style={[styles.refreshButtonText, { color: colors.primary }]}>{refreshCopy.actionLabel}</Text>
+          </Pressable>
+        </View>
       </View>
 
-      {(overview.isFetching || bridgeStatus.isFetching) && <View style={[styles.refreshNotice, { backgroundColor: `${colors.primary}0F`, borderColor: `${colors.primary}2A` }]}><Text style={[styles.refreshText, { color: colors.primary }]}>Syncing latest paper data and API status…</Text></View>}
+      {(isRefreshing || refreshFailed) && <View style={[styles.refreshNotice, { backgroundColor: `${refreshFailed ? colors.error : colors.primary}0F`, borderColor: `${refreshFailed ? colors.error : colors.primary}2A` }]}><Text style={[styles.refreshText, { color: refreshFailed ? colors.error : colors.primary }]}>{refreshCopy.status}</Text></View>}
 
       <Card style={styles.heroCard}>
         <View style={styles.heroTop}>
@@ -148,10 +185,15 @@ const styles = StyleSheet.create({
   content: { paddingTop: 14, paddingBottom: 32 },
   headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 },
   headerCopy: { flexShrink: 1, gap: 2 },
+  headerActions: { alignItems: "flex-end", gap: 8 },
   eyebrow: { fontSize: 11, lineHeight: 16, fontWeight: "900", letterSpacing: 1 },
   title: { fontSize: 29, lineHeight: 35, fontWeight: "900", letterSpacing: -0.5 },
   refreshNotice: { alignSelf: "flex-start", marginBottom: 2, borderWidth: 1, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 6 },
   refreshText: { fontSize: 11, lineHeight: 15, fontWeight: "800" },
+  refreshButton: { minHeight: 34, justifyContent: "center", borderWidth: 1, borderRadius: 17, paddingHorizontal: 11 },
+  refreshButtonPressed: { opacity: 0.72, transform: [{ scale: 0.98 }] },
+  refreshButtonDisabled: { opacity: 0.62 },
+  refreshButtonText: { fontSize: 12, lineHeight: 16, fontWeight: "900" },
   heroCard: { gap: 13 },
   heroTop: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
   heroLabel: { fontSize: 11, fontWeight: "900", letterSpacing: 0.8 },

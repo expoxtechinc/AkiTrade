@@ -65,3 +65,7 @@
 - [x] Disable Vercel’s custom static build mode so the `api/` serverless functions are deployed without an output-directory requirement.
 - [x] Replace the static ESM-only jose import with a Vercel-compatible dynamic import and validate secure session signing.
 - [x] Redeploy after the jose compatibility fix and verify every Vercel production route returns successfully.
+- [x] Add an accessible manual real-time refresh button for dashboard trading data and API status.
+- [x] Validate refresh success, in-progress, and recoverable-error behavior in the dashboard.
+- [ ] Configure required Vercel production OAuth and database environment variables through secure inputs.
+- [ ] Redeploy and verify the dashboard refresh control and configured production services.
