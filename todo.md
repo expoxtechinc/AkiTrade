@@ -40,3 +40,8 @@
 - [x] Validate the Android project release configuration and app-store handoff guidance.
 - [ ] Synchronize the Android release-preparation revision to the selected GitHub repository.
 - [x] Verify and document the current public web control-plane link.
+- [ ] Hand off the final GitHub `main` push and Vercel backend redeployment steps for the user to execute, then verify the reported public release URL.
+- [x] Verify authenticated Vercel account access and report the current AkiTrade project deployment state without triggering a release.
+- [x] Run comprehensive non-production validation across every registered broker adapter, the universal risk engine, and release configuration.
+- [x] Prepare the managed signed Android build and Play Store upload handoff without manually generating or publishing an APK/AAB.
+- [x] Prepare the corrected Vercel production deployment handoff, including the verified failure remediation and live-link checks.
