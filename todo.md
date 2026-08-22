@@ -29,3 +29,9 @@
 - [x] Add a bounded AI analysis layer that produces structured recommendations only and always routes through the risk engine; it must never obtain unrestricted execution authority.
 - [x] Extend the existing mobile broker-connection experience and root dashboard to surface multi-platform capabilities and connection health.
 - [ ] Create a fresh, uniquely named Vercel project after GitHub synchronization and verify its preview deployment without duplicating the unresolved project.
+- [x] Inspect the user-provided Vercel AkiTrade project and verify its Git integration, build configuration, deployment status, and production domains.
+- [x] Complete the Vercel web control-plane production-readiness checklist without exposing secrets or enabling live trade dispatch.
+- [ ] Obtain final confirmation immediately before triggering any external production deployment action.
+- [ ] Verify the public Vercel control plane after authorized deployment and record the operational handoff.
+- [x] Validate the supplied Vercel access credential through a secret-safe account check without logging or committing the token.
+- [x] Use the authenticated Vercel project context to inspect and prepare the existing AkiTrade production deployment.
