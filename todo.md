@@ -68,4 +68,4 @@
 - [x] Add an accessible manual real-time refresh button for dashboard trading data and API status.
 - [x] Validate refresh success, in-progress, and recoverable-error behavior in the dashboard.
 - [x] Configure required Vercel production OAuth and database environment variables through secure inputs.
-- [ ] Redeploy and verify the dashboard refresh control and configured production services.
+- [x] Redeploy and verify the dashboard refresh control and configured production services.
