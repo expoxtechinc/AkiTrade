@@ -10,6 +10,7 @@ import { buildDemoPaperCandles } from "./trading/demo-market";
 import { mt5Bridge } from "./trading/mt5-bridge";
 import { runPaperDecisionCycle } from "./trading/paper-service";
 import { runPaperBacktest } from "./trading/engine";
+import { BROKER_PROVIDERS } from "./trading/broker-contract";
 
 const riskControlsInput = z.object({
   maxRiskPerTradePercent: z.number().finite().min(0.01).max(10),
@@ -126,6 +127,29 @@ export const appRouter = router({
         await db.registerDevicePushToken(ctx.user.id, input.token, input.platform);
         return { success: true };
       }),
+    brokerConnections: protectedProcedure.query(({ ctx }) => db.listBrokerConnections(ctx.user.id)),
+    requestBrokerConnection: protectedProcedure
+      .input(z.object({
+        provider: z.enum(BROKER_PROVIDERS),
+        environment: z.enum(["demo", "live"]),
+        accountReference: z.string().trim().min(3).max(160),
+        displayName: z.string().trim().min(3).max(128),
+      }))
+      .mutation(({ ctx, input }) => db.requestBrokerConnection(ctx.user.id, input)),
+    acknowledgeLiveTradingConsent: protectedProcedure
+      .input(z.object({ brokerConnectionId: z.number().int().positive(), confirmed: z.literal(true) }))
+      .mutation(({ ctx, input }) => db.acknowledgeLiveTradingConsent(ctx.user.id, input.brokerConnectionId)),
+    createExecutionIntent: protectedProcedure
+      .input(z.object({
+        brokerConnectionId: z.number().int().positive(),
+        idempotencyKey: z.string().uuid(),
+        symbol: z.string().trim().min(3).max(32),
+        side: z.enum(["buy", "sell"]),
+        quantity: z.number().finite().positive(),
+        stopLoss: z.number().finite().positive(),
+        takeProfit: z.number().finite().positive(),
+      }))
+      .mutation(({ ctx, input }) => db.createExecutionIntent(ctx.user.id, input)),
   }),
 });
 

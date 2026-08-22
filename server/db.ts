@@ -4,13 +4,16 @@ import { drizzle } from "drizzle-orm/mysql2";
 import {
   auditEvents,
   backtestRuns,
+  brokerConnections,
   decisionEvents,
   devicePushTokens,
+  executionIntents,
   InsertUser,
   notificationEvents,
   notificationPreferences,
   paperPositions,
   riskControls,
+  liveTradingConsents,
   tradingInstruments,
   tradingProfiles,
   tradingStrategies,
@@ -30,6 +33,12 @@ import {
 import { ENV } from "./_core/env";
 import { calculatePaperPnl } from "./trading/engine";
 import { createEmergencyCloseOutcomes } from "./trading/emergency";
+import {
+  assessFutureExecution,
+  getBrokerAuthorizationInstruction,
+  type BrokerEnvironment,
+  type BrokerProvider,
+} from "./trading/broker-contract";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -160,6 +169,145 @@ export async function getWorkspace(userId: number) {
 
   if (!profile || !risk || !notifications) throw new Error("Paper workspace is incomplete");
   return { profile, risk, instruments, strategies, notifications };
+}
+
+export async function listBrokerConnections(userId: number) {
+  await ensurePaperWorkspace(userId);
+  const db = await requireDb();
+  const connections = await db
+    .select()
+    .from(brokerConnections)
+    .where(eq(brokerConnections.userId, userId))
+    .orderBy(desc(brokerConnections.updatedAt));
+  const consents = await db
+    .select()
+    .from(liveTradingConsents)
+    .where(eq(liveTradingConsents.userId, userId));
+  return connections.map((connection) => ({
+    ...connection,
+    consent: consents.find((consent) => consent.brokerConnectionId === connection.id) ?? null,
+  }));
+}
+
+export async function requestBrokerConnection(
+  userId: number,
+  input: { provider: BrokerProvider; environment: BrokerEnvironment; accountReference: string; displayName: string },
+) {
+  const db = await requireDb();
+  await ensurePaperWorkspace(userId);
+  const authorization = getBrokerAuthorizationInstruction(input.provider, input.environment);
+  await db.insert(brokerConnections).values({
+    userId,
+    provider: input.provider,
+    connectionMode: authorization.connectionMode,
+    environment: input.environment,
+    status: authorization.status,
+    accountReference: input.accountReference,
+    displayName: input.displayName,
+  }).onDuplicateKeyUpdate({
+    set: {
+      connectionMode: authorization.connectionMode,
+      environment: input.environment,
+      status: authorization.status,
+      displayName: input.displayName,
+    },
+  });
+  const [connection] = await db.select().from(brokerConnections).where(and(
+    eq(brokerConnections.userId, userId),
+    eq(brokerConnections.provider, input.provider),
+    eq(brokerConnections.accountReference, input.accountReference),
+  )).limit(1);
+  if (!connection) throw new Error("Broker connection could not be created");
+  await recordAuditEvent(userId, "broker_connection_requested", "broker_connection", String(connection.id), {
+    provider: input.provider,
+    environment: input.environment,
+    connectionMode: authorization.connectionMode,
+  });
+  return { connection, authorization };
+}
+
+export async function acknowledgeLiveTradingConsent(userId: number, brokerConnectionId: number) {
+  const db = await requireDb();
+  const [connection] = await db.select().from(brokerConnections).where(and(
+    eq(brokerConnections.id, brokerConnectionId),
+    eq(brokerConnections.userId, userId),
+  )).limit(1);
+  if (!connection) throw new Error("Broker connection was not found");
+  if (connection.environment !== "live") throw new Error("Live consent is available only for a live-designated connection");
+  const [risk] = await db.select().from(riskControls).where(eq(riskControls.userId, userId)).limit(1);
+  if (!risk) throw new Error("Risk controls must be configured before acknowledgement");
+  await db.insert(liveTradingConsents).values({
+    userId,
+    brokerConnectionId,
+    status: "acknowledged",
+    acknowledgementVersion: "1.0",
+    maxRiskPerTradePercent: risk.maxRiskPerTradePercent,
+    maxDailyLoss: risk.maxDailyLoss,
+    acknowledgedAt: new Date(),
+  }).onDuplicateKeyUpdate({
+    set: {
+      status: "acknowledged",
+      acknowledgementVersion: "1.0",
+      maxRiskPerTradePercent: risk.maxRiskPerTradePercent,
+      maxDailyLoss: risk.maxDailyLoss,
+      acknowledgedAt: new Date(),
+      revokedAt: null,
+    },
+  });
+  await recordAuditEvent(userId, "live_execution_consent_acknowledged", "broker_connection", String(connection.id), {
+    provider: connection.provider,
+    liveExecutionRemainsDisabled: !LIVE_TRADING_ENABLED,
+  });
+  return { liveExecutionEnabled: LIVE_TRADING_ENABLED, connectionStatus: connection.status };
+}
+
+export async function createExecutionIntent(
+  userId: number,
+  input: {
+    brokerConnectionId: number;
+    idempotencyKey: string;
+    symbol: string;
+    side: "buy" | "sell";
+    quantity: number;
+    stopLoss: number;
+    takeProfit: number;
+  },
+) {
+  const db = await requireDb();
+  const [connection] = await db.select().from(brokerConnections).where(and(
+    eq(brokerConnections.id, input.brokerConnectionId),
+    eq(brokerConnections.userId, userId),
+  )).limit(1);
+  if (!connection) throw new Error("Broker connection was not found");
+  const [consent] = await db.select().from(liveTradingConsents).where(eq(liveTradingConsents.brokerConnectionId, connection.id)).limit(1);
+  const result = assessFutureExecution({
+    environment: connection.environment,
+    liveTradingEnabled: LIVE_TRADING_ENABLED,
+    connectionStatus: connection.status,
+    userConsentStatus: consent?.status ?? null,
+    hasStopLoss: Number.isFinite(input.stopLoss),
+    hasTakeProfit: Number.isFinite(input.takeProfit),
+  });
+  await db.insert(executionIntents).values({
+    userId,
+    brokerConnectionId: connection.id,
+    idempotencyKey: input.idempotencyKey,
+    environment: connection.environment,
+    symbol: input.symbol,
+    side: input.side,
+    quantity: String(input.quantity),
+    stopLoss: String(input.stopLoss),
+    takeProfit: String(input.takeProfit),
+    status: result.status,
+    rejectionReason: result.allowed ? null : result.reason,
+  });
+  await recordAuditEvent(userId, "execution_intent_recorded", "execution_intent", input.idempotencyKey, {
+    provider: connection.provider,
+    environment: connection.environment,
+    status: result.status,
+    reason: result.allowed ? null : result.reason,
+  });
+  return { ...result, dispatched: false };
 }
 
 export async function getPaperDashboard(userId: number) {

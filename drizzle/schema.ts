@@ -218,6 +218,79 @@ export const devicePushTokens = mysqlTable(
   ],
 );
 
+/** A broker account link stores only public account identity and a server-managed authorization reference. */
+export const brokerConnections = mysqlTable(
+  "brokerConnections",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    provider: mysqlEnum("provider", ["ctrader", "oanda", "mt4_bridge", "mt5_bridge"]).notNull(),
+    connectionMode: mysqlEnum("connectionMode", ["oauth", "server_token", "terminal_bridge"]).notNull(),
+    environment: mysqlEnum("environment", ["demo", "live"]).default("demo").notNull(),
+    status: mysqlEnum("status", ["pending", "read_only", "ready", "revoked", "error"]).default("pending").notNull(),
+    accountReference: varchar("accountReference", { length: 160 }).notNull(),
+    authorizationRef: varchar("authorizationRef", { length: 191 }),
+    displayName: varchar("displayName", { length: 128 }).notNull(),
+    lastVerifiedAt: timestamp("lastVerifiedAt"),
+    lastHeartbeatAt: timestamp("lastHeartbeatAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("brokerConnections_user_provider_account_unique").on(table.userId, table.provider, table.accountReference),
+    index("brokerConnections_user_status_idx").on(table.userId, table.status),
+  ],
+);
+
+/** Explicit, timestamped user consent is required before any future live execution capability can be activated. */
+export const liveTradingConsents = mysqlTable(
+  "liveTradingConsents",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    brokerConnectionId: int("brokerConnectionId").notNull(),
+    status: mysqlEnum("status", ["pending", "acknowledged", "revoked"]).default("pending").notNull(),
+    acknowledgementVersion: varchar("acknowledgementVersion", { length: 32 }).notNull(),
+    maxRiskPerTradePercent: decimal("maxRiskPerTradePercent", { precision: 5, scale: 2 }).notNull(),
+    maxDailyLoss: decimal("maxDailyLoss", { precision: 16, scale: 2 }).notNull(),
+    acknowledgedAt: timestamp("acknowledgedAt"),
+    revokedAt: timestamp("revokedAt"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("liveTradingConsents_connection_unique").on(table.brokerConnectionId),
+    index("liveTradingConsents_user_status_idx").on(table.userId, table.status),
+  ],
+);
+
+/** Normalized execution intents are auditable and idempotent; no order is sent by this release. */
+export const executionIntents = mysqlTable(
+  "executionIntents",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    userId: int("userId").notNull(),
+    brokerConnectionId: int("brokerConnectionId").notNull(),
+    idempotencyKey: varchar("idempotencyKey", { length: 96 }).notNull(),
+    environment: mysqlEnum("environment", ["demo", "live"]).notNull(),
+    symbol: varchar("symbol", { length: 32 }).notNull(),
+    side: mysqlEnum("side", ["buy", "sell"]).notNull(),
+    quantity: decimal("quantity", { precision: 16, scale: 4 }).notNull(),
+    stopLoss: decimal("stopLoss", { precision: 16, scale: 5 }).notNull(),
+    takeProfit: decimal("takeProfit", { precision: 16, scale: 5 }).notNull(),
+    status: mysqlEnum("status", ["validated", "rejected", "blocked", "sent", "confirmed", "failed"])
+      .default("validated")
+      .notNull(),
+    rejectionReason: varchar("rejectionReason", { length: 255 }),
+    providerOrderReference: varchar("providerOrderReference", { length: 160 }),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("executionIntents_idempotency_unique").on(table.idempotencyKey),
+    index("executionIntents_connection_created_idx").on(table.brokerConnectionId, table.createdAt),
+  ],
+);
+
 /** Security and operational audit events. Never persist credentials, secrets, or raw authorization tokens. */
 export const auditEvents = mysqlTable(
   "auditEvents",
@@ -245,4 +318,7 @@ export type BacktestRun = typeof backtestRuns.$inferSelect;
 export type NotificationPreference = typeof notificationPreferences.$inferSelect;
 export type NotificationEvent = typeof notificationEvents.$inferSelect;
 export type DevicePushToken = typeof devicePushTokens.$inferSelect;
+export type BrokerConnection = typeof brokerConnections.$inferSelect;
+export type LiveTradingConsent = typeof liveTradingConsents.$inferSelect;
+export type ExecutionIntent = typeof executionIntents.$inferSelect;
 export type AuditEvent = typeof auditEvents.$inferSelect;

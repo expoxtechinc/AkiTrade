@@ -10,6 +10,7 @@ import { trpc } from "@/lib/trpc";
 const destinations = [
   { label: "Performance", detail: "Paper results and risk statistics", route: "/performance" },
   { label: "Notifications", detail: "Trade and risk-limit alerts", route: "/notifications" },
+  { label: "Broker connections", detail: "Prepare authorized account links without passwords", route: "/broker-connections" },
   { label: "Connection", detail: "MT5 bridge capability and health", route: "/connection" },
   { label: "Settings & security", detail: "Session, privacy, and paper-mode lock", route: "/settings" },
 ] as const;

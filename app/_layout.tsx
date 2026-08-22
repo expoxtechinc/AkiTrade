@@ -93,6 +93,7 @@ export default function RootLayout() {
             <Stack.Screen name="backtest" />
             <Stack.Screen name="performance" />
             <Stack.Screen name="notifications" />
+            <Stack.Screen name="broker-connections" />
             <Stack.Screen name="connection" />
             <Stack.Screen name="settings" />
           </Stack>

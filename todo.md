@@ -12,3 +12,9 @@
 - [x] Generate a unique app icon and configure all required Android, splash, and favicon assets.
 - [x] Add automated tests for authentication protection, paper-mode lockout, risk enforcement, close-all behaviour, and trade calculations.
 - [x] Verify TypeScript, tests, and relevant Android UI screens; then create the first completed-project checkpoint.
+- [x] Define a user-controlled live-trading activation policy with explicit authorization, an irreversible-action confirmation, and no profit guarantee.
+- [x] Research and document supported integration paths for MT4/MT5, Exness, and additional broker platforms without collecting user passwords.
+- [x] Add extensible broker-adapter contracts, encrypted server-side authorization references, execution audit logs, and default-disabled live capability flags.
+- [x] Prepare a persistent worker architecture for 24/7 automation with health checks, kill switches, idempotency, alerting, and deployment documentation.
+- [x] Prepare Railway deployment configuration and environment-variable documentation without publishing or exposing credentials.
+- [ ] Push the approved project revision to the selected AkiTrade GitHub repository.
