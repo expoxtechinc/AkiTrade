@@ -2,7 +2,7 @@
 
 ## Verified Pre-Release State
 
-The non-production validation suite passes with **19 tests**, TypeScript validation, Expo configuration validation, and production API/worker builds. The Android application is configured with package `com.app.akitrade`, version `1.0.0`, Android version code `1`, and managed EAS signing profiles. The public control-plane dashboard currently responds at [https://akitrade-pnwe78x4.manus.space](https://akitrade-pnwe78x4.manus.space).
+The non-production validation suite passes with **20 tests**, TypeScript validation, Expo configuration validation, production API/worker builds, and local checks for the public legal pages. The Android application is configured with package `com.app.akitrade`, version `1.0.0`, Android version code `1`, and managed EAS signing profiles. The public control-plane dashboard currently responds at [https://akitrade-pnwe78x4.manus.space](https://akitrade-pnwe78x4.manus.space).
 
 > AkiTrade version one remains paper/demo only. Broker passwords are not stored in the mobile application, and live order dispatch remains technically disabled.
 
@@ -21,11 +21,12 @@ After the signed artifact is generated, upload the `.aab` to Play Console’s In
 
 The previous Vercel production build failed because it expected a `public` directory. The repository now includes `vercel.json` with `outputDirectory: "dist"`, matching the validated API/worker build output.
 
-Once the approved checkpoint is on GitHub `main`, open **Vercel → AkiTrade → Deployments** and select **Redeploy** for the latest `main` commit. Confirm Vercel uses the repository’s `vercel.json`, then verify:
+Once the approved checkpoint is on GitHub `main`, use [docs/vercel-deployment.md](./vercel-deployment.md) to configure the existing Vercel project and select **Redeploy** for the latest `main` commit. Confirm Vercel uses the repository’s `vercel.json`, then verify:
 
 1. `/` returns the AkiTrade Control Plane dashboard.
 2. `/api/status` returns a healthy control-plane response.
 3. The dashboard reports `PAPER-FIRST` and no broker adapter reports live dispatch enabled.
+4. `/privacy` and `/terms` return the public legal pages used by the sign-in experience and Google OAuth consent-screen configuration.
 
 ## Post-Release Safety Gate
 

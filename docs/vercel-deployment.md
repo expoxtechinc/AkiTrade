@@ -1,4 +1,4 @@
-# Vercel Deployment Preparation
+# AkiTrade Vercel Deployment Runbook
 
 ## What Vercel Hosts
 
@@ -7,6 +7,8 @@ The repository now exposes the AkiTrade control plane as Vercel-compatible serve
 | Route | Vercel behavior | Purpose |
 | --- | --- | --- |
 | `/` | Rewritten to the serverless Express root entry | AkiTrade system and MT5 bridge health dashboard |
+| `/privacy` | Rewritten to the serverless Express root entry | Public Privacy Policy for product and Google OAuth configuration |
+| `/terms` | Rewritten to the serverless Express root entry | Public Terms of Service for product and Google OAuth configuration |
 | `/api/health` | Catch-all Express API function | Liveness probe |
 | `/api/status` | Catch-all Express API function | Public, non-sensitive system and MT5 bridge status |
 | `/api/trpc/*` | Catch-all Express API function | Authenticated mobile application API |
@@ -19,11 +21,51 @@ Vercel is appropriate for the public dashboard and request/response API. It is *
 
 The Expo credential is stored only as `EXPO_TOKEN` in the secure project environment and was validated against Expo without logging its value. For a production Android build, the Expo project must first be linked to EAS and have an `eas.json` profile. Expo documents that access tokens belong in `EXPO_TOKEN` for automated EAS commands and should be treated like passwords. [3]
 
-## Deployment Setup
+## One-Time Deployment Setup
 
-Link `expoxtechinc/AkiTrade` to the authorized Vercel team. Configure production environment variables for the API—at minimum `DATABASE_URL`, `JWT_SECRET`, `VITE_APP_ID`, `OAUTH_SERVER_URL`, `VITE_OAUTH_PORTAL_URL`, `EXPO_PUBLIC_APP_ID`, `EXPO_PUBLIC_API_BASE_URL`, and `EXPO_PUBLIC_OAUTH_PORTAL_URL`. Never copy `EXPO_TOKEN` to public or browser-prefixed variables.
+1. Open the [existing AkiTrade Vercel project](https://vercel.com/expoxtechincs-projects/akitrade) and confirm it is linked to `expoxtechinc/AkiTrade` with `main` as the production branch.
+2. In **Settings → General**, keep the project root at the repository root and use Node.js **22.x**.
+3. In **Settings → Build and Deployment**, use `pnpm install --frozen-lockfile` as the install command and `pnpm build` as the build command. Do not set a static `public` output directory: the committed `vercel.json` requires `dist`.
+4. In **Settings → Environment Variables**, configure server-only values for protected application workflows. Never copy `EXPO_TOKEN`, `VERCEL_TOKEN`, broker secrets, or any secret into browser-prefixed variables.
 
-Set `EXPO_PUBLIC_API_BASE_URL` to the deployed Vercel HTTPS domain only after it is available, then build the Android app through the project’s Publish flow. The native Android binary is not hosted by Vercel.
+| Variable | Use | Needed before a working authenticated production API? |
+| --- | --- | --- |
+| `DATABASE_URL` | Database-backed users, paper workspaces, audit records, and protected APIs | Yes |
+| `JWT_SECRET` | Secure session signing and validation | Yes |
+| `VITE_APP_ID` | OAuth application identity used by the backend | Yes |
+| `OAUTH_SERVER_URL` | Managed OAuth exchange and user lookup | Yes |
+| `VITE_OAUTH_PORTAL_URL` | OAuth authorization portal for the web client | Yes for managed sign-in |
+| `EXPO_PUBLIC_APP_ID` | Public mobile/web OAuth application identifier | Yes for client sign-in |
+| `EXPO_PUBLIC_OAUTH_PORTAL_URL` | Public mobile/web OAuth portal endpoint | Yes for client sign-in |
+| `EXPO_PUBLIC_API_BASE_URL` | Public API origin used by the web/mobile client | Yes for Vercel-backed client calls |
+| `BUILT_IN_FORGE_API_URL` and `BUILT_IN_FORGE_API_KEY` | Optional server-side storage proxy | Only if storage proxy is enabled |
+
+Set `EXPO_PUBLIC_API_BASE_URL` to the deployed Vercel HTTPS domain only after it is available. If the web client authenticates against Vercel, the OAuth callback URL must resolve to `https://<production-domain>/api/oauth/callback`. If direct Google sign-in is added later, configure the verified public `https://<production-domain>/privacy` and `https://<production-domain>/terms` addresses in the Google Cloud consent screen. Keep any future Google client secret server-side.
+
+The Android binary is not hosted by Vercel. After the API domain has been verified, build the Android app through the managed project Publish flow.
+
+## Production Deployment Procedure
+
+1. Open **Deployments** in the existing Vercel AkiTrade project.
+2. Locate the newest deployment sourced from the GitHub `main` branch. Confirm that the commit includes the Privacy Policy, Terms of Service, `vercel.json` route changes, and this runbook.
+3. Open the deployment menu and select **Redeploy**. Keep every live broker-dispatch feature disabled; deployment must preserve the paper-first boundary.
+4. Wait for the build result. If it fails with a missing `public` directory error, review **Settings → Build and Deployment** and confirm Vercel is using the committed `dist` output configuration rather than an old static-output override.
+5. When the deployment is marked **Ready**, open the production domain and run the acceptance checks below. If any critical check fails, use Vercel’s rollback action to return to the previous successful deployment.
+
+## Production Acceptance Checks
+
+| Check | Expected result |
+| --- | --- |
+| Root dashboard | `/` loads without `Cannot GET /`. |
+| Legal pages | `/privacy` and `/terms` each return their public HTML pages. |
+| Health endpoint | `/api/health` returns a successful JSON response with `ok: true`. |
+| Status endpoint | `/api/status` returns the control-plane status and paper-first adapter context. |
+| Security boundary | The UI does not request broker passwords and no adapter reports live order dispatch enabled. |
+| Authenticated flow | After all required production environment values are configured, sign-in creates a secure session without exposing secrets in source or browser logs. |
+
+## After Deployment
+
+Record the Vercel production URL in the Google OAuth consent-screen settings, Android store listing, and support materials. Complete the Google-owned OAuth client setup before enabling direct Google sign-in. Any live broker integration requires a separate official-API, security, compliance, monitoring, and explicit user-consent release.
 
 ## References
 
