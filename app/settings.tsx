@@ -1,0 +1,15 @@
+import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
+import { router } from "expo-router";
+
+import { AkiTradeAuthGate } from "@/components/akitrade-auth-gate";
+import { AkiTradeHeader } from "@/components/akitrade-header";
+import { Card, PrimaryButton, SectionTitle, StatusPill } from "@/components/akitrade-ui";
+import { ScreenContainer } from "@/components/screen-container";
+import { useAuth } from "@/hooks/use-auth";
+import { useColors } from "@/hooks/use-colors";
+import { haptic } from "@/lib/haptics";
+
+export default function SettingsScreen() { return <ScreenContainer className="px-5" containerClassName="bg-background"><AkiTradeAuthGate><SettingsContent /></AkiTradeAuthGate></ScreenContainer>; }
+function SettingsContent() { const colors = useColors(); const { user, logout } = useAuth(); const signOut = () => Alert.alert("Sign out?", "Your local secure session will be removed from this device.", [{ text: "Cancel", style: "cancel" }, { text: "Sign out", style: "destructive", onPress: async () => { haptic.medium(); await logout(); router.replace("/"); } }]); return <ScrollView contentContainerStyle={styles.content}><AkiTradeHeader title="Settings & security" subtitle="Paper-only account controls" /><Card style={styles.cardGap}><StatusPill label="LIVE TRADING LOCKED" tone="success" /><Text style={[styles.profileName, { color: colors.foreground }]}>{user?.name ?? "Secure user"}</Text><Text style={[styles.note, { color: colors.muted }]}>{user?.email ?? "Authenticated through the managed sign-in service"}</Text></Card><SectionTitle title="Security commitments" /><Card style={styles.cardGap}><SecurityItem label="No Exness password" detail="The mobile app never shows a password field or persists broker credentials." /><SecurityItem label="Protected API" detail="Paper control endpoints require an authenticated session and validate all inputs on the server." /><SecurityItem label="Server-only secrets" detail="Future integration credentials are reserved for secure backend configuration and are never bundled into the app." /></Card><SectionTitle title="Version-one mode" /><Card><Text style={[styles.note, { color: colors.muted }]}>AkiTrade runs only paper automation in this release. The backend rejects live execution requests. Live trading cannot be enabled from this mobile client.</Text></Card><View style={styles.signout}><PrimaryButton label="Sign out" onPress={signOut} tone="secondary" /></View></ScrollView>; }
+function SecurityItem({ label, detail }: { label: string; detail: string }) { const colors = useColors(); return <View><Text style={[styles.securityLabel, { color: colors.foreground }]}>{label}</Text><Text style={[styles.note, { color: colors.muted }]}>{detail}</Text></View>; }
+const styles = StyleSheet.create({ content: { paddingBottom: 32 }, cardGap: { gap: 14 }, profileName: { fontSize: 17, fontWeight: "900" }, note: { marginTop: 3, fontSize: 13, lineHeight: 19 }, securityLabel: { fontSize: 14, fontWeight: "900" }, signout: { marginTop: 24 } });

@@ -32,7 +32,7 @@ const env = {
   appSlug: "akitrade",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  logoUrl: "/manus-storage/akitrade-app-icon_0619126c.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -118,6 +118,13 @@ const config: ExpoConfig = {
           buildArchs: ["armeabi-v7a", "arm64-v8a"],
           minSdkVersion: 24,
         },
+      },
+    ],
+    [
+      "expo-notifications",
+      {
+        "color": "#1D6FE8",
+        "defaultChannel": "paper-trading",
       },
     ],
   ],
