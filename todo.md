@@ -69,3 +69,6 @@
 - [x] Validate refresh success, in-progress, and recoverable-error behavior in the dashboard.
 - [x] Configure required Vercel production OAuth and database environment variables through secure inputs.
 - [x] Redeploy and verify the dashboard refresh control and configured production services.
+- [x] Research and document the official, password-free Exness and MetaTrader account-connection steps for web users.
+- [x] Add a clear web account-readiness workflow that directs users to official authorization or terminal-bridge setup without collecting broker passwords.
+- [x] Validate the Exness preparation workflow and retain the paper-first, explicit-order-confirmation boundary.

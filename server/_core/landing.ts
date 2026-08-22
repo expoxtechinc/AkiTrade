@@ -22,8 +22,9 @@ export function getAkiTradeControlPlaneLandingPage() {
         <article class="card"><p class="label">CONTROL-PLANE HEALTH</p><p class="value" id="system-value">Checking…</p><p class="detail" id="system-detail">Fetching current service status.</p><span class="status" id="system-status">CONNECTING</span></article>
         <article class="card"><p class="label">MT5 BRIDGE CONNECTION</p><p class="value" id="mt5-value">Checking…</p><p class="detail" id="mt5-detail">Fetching terminal bridge capability.</p><span class="status warning" id="mt5-status">CONNECTING</span></article>
         <article class="card"><p class="label">UNIFIED ADAPTERS</p><p class="value" id="adapter-value">Checking…</p><p class="detail" id="adapter-detail">Loading supported platform boundaries.</p><span class="status warning" id="adapter-status">CONNECTING</span></article>
+        <article class="card"><p class="label">EXNESS DEMO READINESS</p><p class="value">Start safely</p><p class="detail">Prepare a user-controlled MT5 terminal bridge for a demo account. AkiTrade never asks for your broker password.</p><p style="margin:20px 0 0"><a href="/exness-setup" style="display:inline-flex;padding:10px 13px;border:1px solid #406a8d;border-radius:10px;text-decoration:none;font-size:12px;font-weight:800">Open secure setup steps</a></p></article>
       </section>
-      <div class="foot"><p id="updated">Last checked: —</p><p>Paper-first controls are active. <a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/api/health">API health endpoint</a></p></div>
+      <div class="foot"><p id="updated">Last checked: —</p><p>Paper-first controls are active. <a href="/exness-setup">Exness demo setup</a> · <a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/api/health">API health endpoint</a></p></div>
     </main>
     <script>
       const systemValue = document.getElementById('system-value'); const systemDetail = document.getElementById('system-detail'); const systemStatus = document.getElementById('system-status'); const mt5Value = document.getElementById('mt5-value'); const mt5Detail = document.getElementById('mt5-detail'); const mt5Status = document.getElementById('mt5-status'); const adapterValue = document.getElementById('adapter-value'); const adapterDetail = document.getElementById('adapter-detail'); const adapterStatus = document.getElementById('adapter-status'); const updated = document.getElementById('updated');
@@ -58,6 +59,35 @@ export function getAkiTradePrivacyPolicyPage() {
       { heading: "4. How we use and share information", body: "<p>We use information to provide and maintain the workspace, authenticate users, preserve user-selected settings, calculate simulated trading and risk-control results, send requested notifications, investigate security issues, enforce these Terms, comply with legal obligations, and improve reliability. AkiTrade is not currently configured to use your information to place live broker orders.</p><p>We may share information with providers that host the application, deliver authentication, provide infrastructure, or send notifications, but only as needed to provide the service and subject to confidentiality and security obligations. We may also disclose information when required by law, to protect rights and safety, or to investigate fraud or abuse. We do not sell personal information or share it for cross-context behavioral advertising.</p>" },
       { heading: "5. Retention, deletion, and security", body: "<p>We retain information for as long as needed to operate your workspace, meet legal and security obligations, resolve disputes, and enforce agreements. Authentication and audit records may be retained for a limited period after account closure where reasonably necessary for security or compliance. You may request access, correction, deletion, or a copy of your personal information through the project support channel at <a href=\"https://github.com/expoxtechinc/AkiTrade/issues\">AkiTrade support</a>; do not post passwords, access tokens, account numbers, or other sensitive information in a public request.</p><p>We use reasonable technical and organizational measures designed to protect information, including encrypted transport, server-side secret management, authenticated sessions, and audit logging. No method of transmission or storage is completely secure.</p>" },
       { heading: "6. International use, children, and changes", body: "<p>The service may be operated using infrastructure in locations other than your country. Where permitted, using AkiTrade means information may be processed in those locations with appropriate safeguards. AkiTrade is not directed to children and should not be used by anyone who is not legally able to enter into these Terms in their location.</p><p>We may update this Privacy Policy when the service or legal requirements change. The current version will always be posted at this address with its updated date.</p>" },
+    ],
+  );
+}
+
+export function getAkiTradeExnessSetupPage() {
+  return getLegalPage(
+    "Prepare your Exness demo connection",
+    "Use this user-controlled MT5 bridge workflow to begin with a demo account while keeping broker passwords out of AkiTrade.",
+    [
+      {
+        heading: "1. Start with an official Exness demo account",
+        body: "<p>Use the official <a href=\"https://www.exness.com/metatrader-5/\" rel=\"noreferrer\">Exness MT5</a> environment to create or select a <strong>demo</strong> trading account. AkiTrade is not a broker, cannot create an account for you, and does not collect an Exness password.</p>",
+      },
+      {
+        heading: "2. Install and sign in to MT5 on your own terminal host",
+        body: "<p>Install the official MT5 terminal on a Windows computer or managed terminal host that you control. Sign in to the terminal directly using the broker-approved flow. The official MetaTrader Python integration communicates with the running terminal; it is not a browser-only broker login.</p>",
+      },
+      {
+        heading: "3. Pair a local bridge without sharing your password",
+        body: "<p>Run the AkiTrade companion bridge beside that terminal. Its first production capability should be <strong>read-only health and account-data reporting</strong>. Pair it with a server-side enrollment reference or one-time bridge token; never paste your broker password into this website or the mobile app.</p>",
+      },
+      {
+        heading: "4. Confirm paper readiness in the web control plane",
+        body: "<p>Return to the <a href=\"/\">Control Plane</a> and wait for the MT5 bridge card to report a healthy state. Then sign in to your AkiTrade paper workspace and use the dashboard refresh control to request the latest authorized paper and bridge status. A healthy bridge does not enable a live order.</p>",
+      },
+      {
+        heading: "5. Current safety boundary",
+        body: "<p>This release remains paper-first. AI output is recommendation-only, risk controls remain mandatory, and live dispatch is disabled. A future live order workflow would require a separately authorized official adapter, a security review, and a fresh explicit confirmation of the specific order before anything is sent to a broker.</p>",
+      },
     ],
   );
 }

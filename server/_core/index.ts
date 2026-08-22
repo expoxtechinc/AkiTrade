@@ -7,6 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import {
   getAkiTradeControlPlaneLandingPage,
+  getAkiTradeExnessSetupPage,
   getAkiTradePrivacyPolicyPage,
   getAkiTradeTermsPage,
 } from "./landing";
@@ -70,6 +71,10 @@ export function createAkiTradeApp() {
 
   app.get("/privacy", (_req, res) => {
     res.status(200).type("html").send(getAkiTradePrivacyPolicyPage());
+  });
+
+  app.get("/exness-setup", (_req, res) => {
+    res.status(200).type("html").send(getAkiTradeExnessSetupPage());
   });
 
   app.get("/terms", (_req, res) => {
