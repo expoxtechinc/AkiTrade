@@ -63,3 +63,5 @@
 - [x] Remove the static-output conflict that serves the server bundle at `/` and restores Vercel serverless route handling.
 - [ ] Revalidate and redeploy the corrected Vercel configuration, then recheck every production route.
 - [ ] Disable Vercel’s custom static build mode so the `api/` serverless functions are deployed without an output-directory requirement.
+- [x] Replace the static ESM-only jose import with a Vercel-compatible dynamic import and validate secure session signing.
+- [ ] Redeploy after the jose compatibility fix and verify every Vercel production route returns successfully.
