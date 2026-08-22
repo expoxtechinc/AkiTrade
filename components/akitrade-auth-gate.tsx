@@ -1,6 +1,7 @@
 import { type ReactNode, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { ExternalLink } from "@/components/external-link";
 import { startOAuthLogin } from "@/constants/oauth";
 import { useAuth } from "@/hooks/use-auth";
 import { useColors } from "@/hooks/use-colors";
@@ -37,6 +38,7 @@ export function AkiTradeAuthGate({ children }: { children: ReactNode }) {
         <PrimaryButton label={starting ? "Opening secure sign-in…" : "Sign in securely"} onPress={handleSignIn} disabled={starting} />
       </View>
       <Text style={[styles.note, { color: colors.muted }]}>Version one is restricted to demo / paper trading. Simulated results do not guarantee future performance.</Text>
+      <Text style={[styles.legal, { color: colors.muted }]}>By continuing, you acknowledge the <ExternalLink href={"https://akitrade-pnwe78x4.manus.space/privacy"} style={[styles.legalLink, { color: colors.primary }]}>Privacy Policy</ExternalLink> and <ExternalLink href={"https://akitrade-pnwe78x4.manus.space/terms"} style={[styles.legalLink, { color: colors.primary }]}>Terms of Service</ExternalLink>.</Text>
     </View>
   );
 }
@@ -49,4 +51,6 @@ const styles = StyleSheet.create({
   detail: { fontSize: 15, lineHeight: 22 },
   action: { marginTop: 8 },
   note: { marginTop: 5, fontSize: 12, lineHeight: 18 },
+  legal: { fontSize: 12, lineHeight: 18 },
+  legalLink: { fontWeight: "800", textDecorationLine: "underline" },
 });

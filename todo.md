@@ -49,3 +49,7 @@
 - [x] Implement Google-auth readiness and broker connection scaffolding without collecting broker passwords or granting autonomous live dispatch.
 - [x] Validate authentication and broker-connection security boundaries and prepare managed Android release handoff instructions.
 - [x] Document the remaining user-owned Google Cloud OAuth consent-screen, redirect-URI, and client-credential setup required for direct Google sign-in.
+- [x] Draft public, product-specific Privacy Policy and Terms of Service pages for the paper-first AkiTrade service.
+- [x] Add public legal routes and link them from the secure sign-in experience for Google OAuth consent-screen use.
+- [x] Validate the public legal routes and prepare the redeployment handoff without publishing externally.
+- [ ] Push this legal-pages release to GitHub and redeploy the Vercel production service after explicit confirmation.

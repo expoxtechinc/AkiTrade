@@ -5,7 +5,11 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
-import { getAkiTradeControlPlaneLandingPage } from "./landing";
+import {
+  getAkiTradeControlPlaneLandingPage,
+  getAkiTradePrivacyPolicyPage,
+  getAkiTradeTermsPage,
+} from "./landing";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { mt5Bridge } from "../trading/mt5-bridge";
@@ -62,6 +66,14 @@ export function createAkiTradeApp() {
 
   app.get("/", (_req, res) => {
     res.status(200).type("html").send(getAkiTradeControlPlaneLandingPage());
+  });
+
+  app.get("/privacy", (_req, res) => {
+    res.status(200).type("html").send(getAkiTradePrivacyPolicyPage());
+  });
+
+  app.get("/terms", (_req, res) => {
+    res.status(200).type("html").send(getAkiTradeTermsPage());
   });
 
   app.get("/api/health", (_req, res) => {
