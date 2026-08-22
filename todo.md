@@ -31,8 +31,8 @@
 - [ ] Create a fresh, uniquely named Vercel project after GitHub synchronization and verify its preview deployment without duplicating the unresolved project.
 - [x] Inspect the user-provided Vercel AkiTrade project and verify its Git integration, build configuration, deployment status, and production domains.
 - [x] Complete the Vercel web control-plane production-readiness checklist without exposing secrets or enabling live trade dispatch.
-- [ ] Obtain final confirmation immediately before triggering any external production deployment action.
-- [ ] Verify the public Vercel control plane after authorized deployment and record the operational handoff.
+- [x] Obtain final confirmation immediately before triggering any external production deployment action.
+- [x] Verify the public Vercel control plane after authorized deployment and record the operational handoff.
 - [x] Validate the supplied Vercel access credential through a secret-safe account check without logging or committing the token.
 - [x] Use the authenticated Vercel project context to inspect and prepare the existing AkiTrade production deployment.
 - [x] Assess and prepare Android application identifiers, versioning, signing readiness, privacy disclosures, and store listing requirements.
@@ -52,16 +52,16 @@
 - [x] Draft public, product-specific Privacy Policy and Terms of Service pages for the paper-first AkiTrade service.
 - [x] Add public legal routes and link them from the secure sign-in experience for Google OAuth consent-screen use.
 - [x] Validate the public legal routes and prepare the redeployment handoff without publishing externally.
-- [ ] Push this legal-pages release to GitHub and redeploy the Vercel production service after explicit confirmation.
+- [x] Push this legal-pages release to GitHub and redeploy the Vercel production service after explicit confirmation.
 - [x] Push the approved legal-pages release to the selected expoxtechinc/AkiTrade GitHub main branch.
 - [x] Verify the pushed GitHub main revision and deliver the step-by-step Vercel deployment procedure without triggering production deployment.
 - [x] Push the final Vercel deployment runbook update to the selected GitHub main branch.
 - [x] Add a smooth, accessible dashboard loading animation for API and trading-data fetch states.
-- [ ] Validate the dashboard loading state and synchronize the final release to GitHub main.
-- [ ] Redeploy the user-approved Vercel production service from the final GitHub main revision.
-- [ ] Verify the Vercel production dashboard, legal pages, health endpoint, and status endpoint after deployment.
+- [x] Validate the dashboard loading state and synchronize the final release to GitHub main.
+- [x] Redeploy the user-approved Vercel production service from the final GitHub main revision.
+- [x] Verify the Vercel production dashboard, legal pages, health endpoint, and status endpoint after deployment.
 - [x] Remove the static-output conflict that serves the server bundle at `/` and restores Vercel serverless route handling.
-- [ ] Revalidate and redeploy the corrected Vercel configuration, then recheck every production route.
-- [ ] Disable Vercel’s custom static build mode so the `api/` serverless functions are deployed without an output-directory requirement.
+- [x] Revalidate and redeploy the corrected Vercel configuration, then recheck every production route.
+- [x] Disable Vercel’s custom static build mode so the `api/` serverless functions are deployed without an output-directory requirement.
 - [x] Replace the static ESM-only jose import with a Vercel-compatible dynamic import and validate secure session signing.
-- [ ] Redeploy after the jose compatibility fix and verify every Vercel production route returns successfully.
+- [x] Redeploy after the jose compatibility fix and verify every Vercel production route returns successfully.
