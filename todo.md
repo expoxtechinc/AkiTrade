@@ -60,3 +60,5 @@
 - [ ] Validate the dashboard loading state and synchronize the final release to GitHub main.
 - [ ] Redeploy the user-approved Vercel production service from the final GitHub main revision.
 - [ ] Verify the Vercel production dashboard, legal pages, health endpoint, and status endpoint after deployment.
+- [x] Remove the static-output conflict that serves the server bundle at `/` and restores Vercel serverless route handling.
+- [ ] Revalidate and redeploy the corrected Vercel configuration, then recheck every production route.

@@ -25,7 +25,7 @@ The Expo credential is stored only as `EXPO_TOKEN` in the secure project environ
 
 1. Open the [existing AkiTrade Vercel project](https://vercel.com/expoxtechincs-projects/akitrade) and confirm it is linked to `expoxtechinc/AkiTrade` with `main` as the production branch.
 2. In **Settings → General**, keep the project root at the repository root and use Node.js **22.x**.
-3. In **Settings → Build and Deployment**, use `pnpm install --frozen-lockfile` as the install command and `pnpm build` as the build command. Do not set a static `public` output directory: the committed `vercel.json` requires `dist`.
+3. In **Settings → Build and Deployment**, use `pnpm install --frozen-lockfile` as the install command and `pnpm build` as the build command. Leave **Output Directory** unset/auto-detected. This project uses Vercel Functions from `api/`; `dist` contains build artifacts for the server and must not be published as a static site.
 4. In **Settings → Environment Variables**, configure server-only values for protected application workflows. Never copy `EXPO_TOKEN`, `VERCEL_TOKEN`, broker secrets, or any secret into browser-prefixed variables.
 
 | Variable | Use | Needed before a working authenticated production API? |
@@ -49,7 +49,7 @@ The Android binary is not hosted by Vercel. After the API domain has been verifi
 1. Open **Deployments** in the existing Vercel AkiTrade project.
 2. Locate the newest deployment sourced from the GitHub `main` branch. Confirm that the commit includes the Privacy Policy, Terms of Service, `vercel.json` route changes, and this runbook.
 3. Open the deployment menu and select **Redeploy**. Keep every live broker-dispatch feature disabled; deployment must preserve the paper-first boundary.
-4. Wait for the build result. If it fails with a missing `public` directory error, review **Settings → Build and Deployment** and confirm Vercel is using the committed `dist` output configuration rather than an old static-output override.
+4. Wait for the build result. If `/` shows bundled server source or any public route returns `FUNCTION_INVOCATION_FAILED`, remove any project-level static Output Directory override and confirm the committed `vercel.json` has no `outputDirectory` value. Vercel must invoke `api/index.ts` and `api/[...path].ts`, not serve the build artifacts in `dist` directly.
 5. When the deployment is marked **Ready**, open the production domain and run the acceptance checks below. If any critical check fails, use Vercel’s rollback action to return to the previous successful deployment.
 
 ## Production Acceptance Checks
