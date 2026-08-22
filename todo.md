@@ -45,3 +45,7 @@
 - [x] Run comprehensive non-production validation across every registered broker adapter, the universal risk engine, and release configuration.
 - [x] Prepare the managed signed Android build and Play Store upload handoff without manually generating or publishing an APK/AAB.
 - [x] Prepare the corrected Vercel production deployment handoff, including the verified failure remediation and live-link checks.
+- [x] Document the secure Google sign-in and official broker-authorization scope, including paper-first and user-confirmed order boundaries.
+- [x] Implement Google-auth readiness and broker connection scaffolding without collecting broker passwords or granting autonomous live dispatch.
+- [x] Validate authentication and broker-connection security boundaries and prepare managed Android release handoff instructions.
+- [x] Document the remaining user-owned Google Cloud OAuth consent-screen, redirect-URI, and client-credential setup required for direct Google sign-in.
