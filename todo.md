@@ -35,3 +35,8 @@
 - [ ] Verify the public Vercel control plane after authorized deployment and record the operational handoff.
 - [x] Validate the supplied Vercel access credential through a secret-safe account check without logging or committing the token.
 - [x] Use the authenticated Vercel project context to inspect and prepare the existing AkiTrade production deployment.
+- [x] Assess and prepare Android application identifiers, versioning, signing readiness, privacy disclosures, and store listing requirements.
+- [x] Add Play Store and alternative-distribution submission materials without making a store submission.
+- [x] Validate the Android project release configuration and app-store handoff guidance.
+- [ ] Synchronize the Android release-preparation revision to the selected GitHub repository.
+- [x] Verify and document the current public web control-plane link.
