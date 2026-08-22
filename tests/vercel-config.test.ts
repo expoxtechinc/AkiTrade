@@ -12,6 +12,7 @@ describe("Vercel serverless configuration", () => {
 
     expect(config.outputDirectory).toBeUndefined();
     expect(config.functions?.["server.ts"]?.maxDuration).toBe(30);
+    expect(serverEntrypoint).toContain('import express from "express"');
     expect(serverEntrypoint).toContain("createAkiTradeApp");
     expect(serverEntrypoint).toContain("export default app");
     expect(existsSync(resolve(process.cwd(), "api/index.ts"))).toBe(false);
