@@ -56,3 +56,7 @@
 - [x] Push the approved legal-pages release to the selected expoxtechinc/AkiTrade GitHub main branch.
 - [x] Verify the pushed GitHub main revision and deliver the step-by-step Vercel deployment procedure without triggering production deployment.
 - [x] Push the final Vercel deployment runbook update to the selected GitHub main branch.
+- [x] Add a smooth, accessible dashboard loading animation for API and trading-data fetch states.
+- [ ] Validate the dashboard loading state and synchronize the final release to GitHub main.
+- [ ] Redeploy the user-approved Vercel production service from the final GitHub main revision.
+- [ ] Verify the Vercel production dashboard, legal pages, health endpoint, and status endpoint after deployment.

@@ -2,6 +2,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AkiTradeAuthGate } from "@/components/akitrade-auth-gate";
 import { Card, EmptyState, formatMoney, Metric, PrimaryButton, SectionTitle, StatusPill } from "@/components/akitrade-ui";
+import { DashboardLoadingState } from "@/components/dashboard-loading-state";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { haptic } from "@/lib/haptics";
@@ -21,6 +22,7 @@ export default function OverviewScreen() {
 function OverviewContent() {
   const colors = useColors();
   const overview = trpc.trading.overview.useQuery();
+  const bridgeStatus = trpc.trading.mt5BridgeHealth.useQuery();
   const setAutomation = trpc.trading.setAutomation.useMutation({ onSuccess: () => overview.refetch() });
   const runCycle = trpc.trading.runDemoPaperCycle.useMutation({ onSuccess: () => overview.refetch() });
   const closeAll = trpc.trading.closeAllPaperPositions.useMutation({ onSuccess: () => overview.refetch() });
@@ -57,7 +59,7 @@ function OverviewContent() {
     );
   };
 
-  if (overview.isLoading) return <View style={styles.fill} />;
+  if (overview.isLoading) return <DashboardLoadingState />;
   if (!data) return <EmptyState title="Workspace unavailable" detail="Your secure paper workspace could not be loaded. Check your session and try again." />;
 
   const running = data.profile.automationStatus === "running";
@@ -72,6 +74,8 @@ function OverviewContent() {
         </View>
         <StatusPill label="DEMO / PAPER" tone="success" />
       </View>
+
+      {(overview.isFetching || bridgeStatus.isFetching) && <View style={[styles.refreshNotice, { backgroundColor: `${colors.primary}0F`, borderColor: `${colors.primary}2A` }]}><Text style={[styles.refreshText, { color: colors.primary }]}>Syncing latest paper data and API status…</Text></View>}
 
       <Card style={styles.heroCard}>
         <View style={styles.heroTop}>
@@ -141,12 +145,13 @@ function OverviewContent() {
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1 },
   content: { paddingTop: 14, paddingBottom: 32 },
   headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 },
   headerCopy: { flexShrink: 1, gap: 2 },
   eyebrow: { fontSize: 11, lineHeight: 16, fontWeight: "900", letterSpacing: 1 },
   title: { fontSize: 29, lineHeight: 35, fontWeight: "900", letterSpacing: -0.5 },
+  refreshNotice: { alignSelf: "flex-start", marginBottom: 2, borderWidth: 1, borderRadius: 99, paddingHorizontal: 10, paddingVertical: 6 },
+  refreshText: { fontSize: 11, lineHeight: 15, fontWeight: "800" },
   heroCard: { gap: 13 },
   heroTop: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
   heroLabel: { fontSize: 11, fontWeight: "900", letterSpacing: 0.8 },
