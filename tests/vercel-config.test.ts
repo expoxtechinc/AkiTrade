@@ -14,6 +14,7 @@ describe("Vercel serverless configuration", () => {
     expect(config.functions?.["server.ts"]?.maxDuration).toBe(30);
     expect(serverEntrypoint).toContain('import express from "express"');
     expect(serverEntrypoint).toContain("createAkiTradeApp");
+    expect(serverEntrypoint).toContain("app.listen");
     expect(serverEntrypoint).toContain("export default app");
     expect(existsSync(resolve(process.cwd(), "api/index.ts"))).toBe(false);
     expect(existsSync(resolve(process.cwd(), "api/[...path].ts"))).toBe(false);

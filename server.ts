@@ -8,4 +8,7 @@ import { createAkiTradeApp } from "./server/_core/index";
  */
 const app: ReturnType<typeof express> = createAkiTradeApp();
 
+// Vercel captures this Node server and routes production requests to Express.
+app.listen(Number(process.env.PORT ?? 3000));
+
 export default app;
